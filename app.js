@@ -3,6 +3,8 @@ const OPEN_METEO_GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const UNSPLASH_ACCESS_KEY = "MJINNu4GwhlXbpGNgEgAqoswqv2I3HBs5E-ZbS1REwU";
 const UNSPLASH_URL = "https://api.unsplash.com/photos/random";
 const QUOTE_URL = "https://api.allorigins.win/raw?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Fquotes";
+const DEFAULT_PHOTO_A = "assets/placeholder-a.svg";
+const DEFAULT_PHOTO_B = "assets/placeholder-b.svg";
 const STORAGE_KEY = "wwan-settings";
 
 const defaults = {
@@ -345,13 +347,13 @@ function setWeatherError(id, message) {
     elements.tempA.textContent = "--";
     elements.iconA.textContent = "—";
     elements.suggestionA.textContent = "";
-    setPhoto("A", "");
+    setDefaultPhoto("A");
   } else {
     elements.descB.textContent = message;
     elements.tempB.textContent = "--";
     elements.iconB.textContent = "—";
     elements.suggestionB.textContent = "";
-    setPhoto("B", "");
+    setDefaultPhoto("B");
   }
 }
 
@@ -488,22 +490,25 @@ function setPhoto(id, url, alt) {
     return;
   }
   target.classList.remove("is-loaded");
-  if (!url) {
-    target.removeAttribute("src");
-    target.alt = "";
-    return;
-  }
-  target.src = url;
+  const fallback = id === "A" ? DEFAULT_PHOTO_A : DEFAULT_PHOTO_B;
+  const finalUrl = url || fallback;
+  target.src = finalUrl;
   target.alt = alt || "";
   target.onload = () => target.classList.add("is-loaded");
 }
 
+function setDefaultPhoto(id) {
+  const fallback = id === "A" ? DEFAULT_PHOTO_A : DEFAULT_PHOTO_B;
+  setPhoto(id, fallback, "");
+}
+
 async function fetchCityPhoto(id, city, country) {
   if (!UNSPLASH_ACCESS_KEY || UNSPLASH_ACCESS_KEY === "YOUR_UNSPLASH_ACCESS_KEY") {
+    setDefaultPhoto(id);
     return;
   }
   if (!city) {
-    setPhoto(id, "");
+    setDefaultPhoto(id);
     return;
   }
   const query = encodeURIComponent(`${city} ${country || ""}`.trim());
@@ -511,12 +516,13 @@ async function fetchCityPhoto(id, city, country) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
+      setDefaultPhoto(id);
       return;
     }
     const data = await response.json();
     setPhoto(id, data.urls?.regular, data.alt_description || `${city} photo`);
   } catch (error) {
-    setPhoto(id, "");
+    setDefaultPhoto(id);
   }
 }
 

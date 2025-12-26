@@ -29,3 +29,4 @@ Then open `http://localhost:8080` in your browser.
 - Weather uses Open-Meteo (no key required) and metric units (°C).
 - Quotes come from the ZenQuotes API via AllOrigins to avoid CORS issues.
 - Background and card styling adapt to current weather conditions.
+- City photos fall back to local placeholders if Unsplash is unavailable or rate-limited.

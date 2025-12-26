@@ -14,9 +14,9 @@ const defaults = {
   },
   personB: {
     name: "Nihal",
-    city: "Meknes",
+    city: "Casablanca",
     country: "Morocco",
-    timeZone: "Africa/Meknes",
+    timeZone: "Africa/Casablanca",
   },
 };
 

@@ -2,7 +2,7 @@ const OPEN_METEO_WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
 const OPEN_METEO_GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const UNSPLASH_ACCESS_KEY = "MJINNu4GwhlXbpGNgEgAqoswqv2I3HBs5E-ZbS1REwU";
 const UNSPLASH_URL = "https://api.unsplash.com/photos/random";
-const QUOTE_URL = "https://api.quotable.io/random?tags=love";
+const QUOTE_URL = "https://zenquotes.io/api/quotes";
 const STORAGE_KEY = "wwan-settings";
 
 const defaults = {
@@ -528,8 +528,9 @@ async function fetchQuote() {
       throw new Error("Quote unavailable");
     }
     const data = await response.json();
-    elements.quoteText.textContent = data.content;
-    elements.quoteAuthor.textContent = data.author ? `— ${data.author}` : "";
+    const quote = Array.isArray(data) ? data[0] : data;
+    elements.quoteText.textContent = quote.q || quote.content || "";
+    elements.quoteAuthor.textContent = quote.a || quote.author ? `— ${quote.a || quote.author}` : "";
   } catch (error) {
     const pick = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
     elements.quoteText.textContent = pick.content;

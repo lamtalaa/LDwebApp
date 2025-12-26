@@ -27,5 +27,5 @@ Then open `http://localhost:8080` in your browser.
 ## Notes
 - Default time zones are `America/New_York` and `Africa/Casablanca`.
 - Weather uses Open-Meteo (no key required) and metric units (°C).
-- Quotes come from the Quotable API.
+- Quotes come from the ZenQuotes API.
 - Background and card styling adapt to current weather conditions.

@@ -2,7 +2,7 @@ const OPEN_METEO_WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
 const OPEN_METEO_GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const UNSPLASH_ACCESS_KEY = "MJINNu4GwhlXbpGNgEgAqoswqv2I3HBs5E-ZbS1REwU";
 const UNSPLASH_URL = "https://api.unsplash.com/photos/random";
-const QUOTE_URL = "https://zenquotes.io/api/quotes";
+const QUOTE_URL = "https://api.allorigins.win/raw?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Fquotes";
 const STORAGE_KEY = "wwan-settings";
 
 const defaults = {
@@ -507,13 +507,9 @@ async function fetchCityPhoto(id, city, country) {
     return;
   }
   const query = encodeURIComponent(`${city} ${country || ""}`.trim());
-  const url = `${UNSPLASH_URL}?query=${query}&orientation=landscape`;
+  const url = `${UNSPLASH_URL}?query=${query}&orientation=landscape&client_id=${UNSPLASH_ACCESS_KEY}`;
   try {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
-      },
-    });
+    const response = await fetch(url);
     if (!response.ok) {
       return;
     }

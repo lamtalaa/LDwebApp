@@ -10,12 +10,14 @@ const defaults = {
     name: "Yassine",
     city: "New York City",
     country: "USA",
+    countryCode: "US",
     timeZone: "America/New_York",
   },
   personB: {
     name: "Nihal",
     city: "Meknes",
     country: "Morocco",
+    countryCode: "MA",
     timeZone: "Africa/Casablanca",
   },
 };
@@ -378,7 +380,7 @@ function setWeatherSuccess(id, data) {
   applyGlobalTheme();
 }
 
-async function fetchWeather(id, city) {
+async function fetchWeather(id, city, countryCode) {
   if (!city) {
     setWeatherError(id, "City not found. Try a nearby town.");
     return;
@@ -387,7 +389,7 @@ async function fetchWeather(id, city) {
   setWeatherLoading(id);
 
   try {
-    const resolved = await resolveCity(city);
+    const resolved = await resolveCity(city, countryCode);
     if (!resolved) {
       setWeatherError(id, "City not found. Try a nearby town.");
       return;
@@ -408,8 +410,9 @@ async function requestWeather(resolved) {
   return response.json();
 }
 
-async function resolveCity(city) {
-  const url = `${OPEN_METEO_GEO_URL}?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+async function resolveCity(city, countryCode) {
+  const countryParam = countryCode ? `&country=${encodeURIComponent(countryCode)}` : "";
+  const url = `${OPEN_METEO_GEO_URL}?name=${encodeURIComponent(city)}&count=1&language=en&format=json${countryParam}`;
   const response = await fetch(url);
   if (!response.ok) {
     return null;
@@ -437,7 +440,7 @@ function handleWeatherSuccess(id, data, originalQuery, resolved) {
     updateTimes();
   }
 
-  const countryCode = resolved?.country_code;
+  const countryCode = resolved?.country_code ? String(resolved.country_code).toUpperCase() : "";
   const country = normalizeCountry(
     countryCode,
     resolved?.country || (id === "A" ? state.settings.personA.country : state.settings.personB.country)
@@ -448,12 +451,18 @@ function handleWeatherSuccess(id, data, originalQuery, resolved) {
   if (id === "A") {
     state.settings.personA.city = cityName || state.settings.personA.city;
     state.settings.personA.country = country;
+    if (countryCode) {
+      state.settings.personA.countryCode = countryCode;
+    }
     if (isValidTimeZone(timeZone)) {
       state.settings.personA.timeZone = timeZone;
     }
   } else {
     state.settings.personB.city = cityName || state.settings.personB.city;
     state.settings.personB.country = country;
+    if (countryCode) {
+      state.settings.personB.countryCode = countryCode;
+    }
     if (isValidTimeZone(timeZone)) {
       state.settings.personB.timeZone = timeZone;
     }
@@ -560,8 +569,8 @@ function handleSubmit(event) {
 
   saveSettings(state.settings);
   updateLabels();
-  fetchWeather("A", state.settings.personA.city);
-  fetchWeather("B", state.settings.personB.city);
+  fetchWeather("A", state.settings.personA.city, state.settings.personA.countryCode);
+  fetchWeather("B", state.settings.personB.city, state.settings.personB.countryCode);
   closeModal();
 }
 
@@ -569,8 +578,8 @@ function init() {
   state.settings = loadSettings();
   updateLabels();
   updateTimes();
-  fetchWeather("A", state.settings.personA.city);
-  fetchWeather("B", state.settings.personB.city);
+  fetchWeather("A", state.settings.personA.city, state.settings.personA.countryCode);
+  fetchWeather("B", state.settings.personB.city, state.settings.personB.countryCode);
   fetchQuote();
 
   hydrateForm();

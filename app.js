@@ -199,16 +199,18 @@ function saveSettings(nextSettings) {
 }
 
 function formatTime(date, timeZone) {
+  const safeZone = isValidTimeZone(timeZone) ? timeZone : "UTC";
   return new Intl.DateTimeFormat("en-US", {
-    timeZone,
+    timeZone: safeZone,
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
 }
 
 function getHourFromZone(timeZone) {
+  const safeZone = isValidTimeZone(timeZone) ? timeZone : "UTC";
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
+    timeZone: safeZone,
     hour: "numeric",
     hour12: false,
   }).formatToParts(new Date());
@@ -216,9 +218,10 @@ function getHourFromZone(timeZone) {
 }
 
 function getOffsetMinutes(timeZone) {
+  const safeZone = isValidTimeZone(timeZone) ? timeZone : "UTC";
   const now = new Date();
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
+    timeZone: safeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -231,6 +234,18 @@ function getOffsetMinutes(timeZone) {
   const iso = `${getPart("year")}-${getPart("month")}-${getPart("day")}T${getPart("hour")}:${getPart("minute")}:${getPart("second")}Z`;
   const asUtc = new Date(iso);
   return (asUtc - now) / 60000;
+}
+
+function isValidTimeZone(timeZone) {
+  if (!timeZone) {
+    return false;
+  }
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format();
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 function localTimeFromOffset(offsetSeconds) {
@@ -433,13 +448,13 @@ function handleWeatherSuccess(id, data, originalQuery, resolved) {
   if (id === "A") {
     state.settings.personA.city = cityName || state.settings.personA.city;
     state.settings.personA.country = country;
-    if (timeZone) {
+    if (isValidTimeZone(timeZone)) {
       state.settings.personA.timeZone = timeZone;
     }
   } else {
     state.settings.personB.city = cityName || state.settings.personB.city;
     state.settings.personB.country = country;
-    if (timeZone) {
+    if (isValidTimeZone(timeZone)) {
       state.settings.personB.timeZone = timeZone;
     }
   }
